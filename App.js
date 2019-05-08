@@ -16,7 +16,7 @@ export default class App extends Component {
       startOnBoot: true,
       startForeground: true,
       stopOnTerminate: false,
-      interval: 10000,
+      interval: 5000,
       fastestInterval: 5000,
       activitiesInterval: 10000,
       stopOnStillActivity: false,
