@@ -1,50 +1,67 @@
 import React, { Component } from 'react';
 import { Text, View } from 'react-native';
-import RNLocation from 'react-native-location';
+import BackgroundGeolocation from '@mauron85/react-native-background-geolocation';
 
 export default class App extends Component {
-  async componentDidMount() {
-    RNLocation.configure({
-      allowsBackgroundLocationUpdates: true,
-      pausesLocationUpdatesAutomatically: false,
-      showsBackgroundLocationIndicator: true,
-    });
-    const permission = await RNLocation.checkPermission({
-      ios: 'always', // or 'always'
-      android: {
-        detail: 'fine', // or 'fine'
-      },
-    });
-    if (!permission) {
-      const request = await RNLocation.requestPermission({
-        ios: 'always',
-        android: {
-          detail: 'fine',
-          rationale: {
-            title: 'Necesitamos permisos para acceder a tu ubicación',
-            message: 'Usaremos tu ubicación para ubicarte en el mapa',
-            buttonNegative: 'Denegar',
-            buttonPositive: 'Permitir',
-          },
-        },
-      });
-      if (request) this.startUpdatingLocation();
-    } else {
-      this.startUpdatingLocation();
-    }
-    console.log(permission);
+  state = {
+    latitude: 'calculando....',
+    longitude: 'calculando....',
   }
 
-  startUpdatingLocation = () => {
-    RNLocation.subscribeToLocationUpdates((locations) => {
-      console.log(locations);
+  componentDidMount() {
+    BackgroundGeolocation.configure({
+      debug: false,
+      desiredAccuracy: BackgroundGeolocation.HIGH_ACCURACY,
+      distanceFilter: 0,
+      startOnBoot: true,
+      startForeground: true,
+      stopOnTerminate: false,
+      interval: 10000,
+      fastestInterval: 5000,
+      activitiesInterval: 10000,
+      stopOnStillActivity: false,
+      notificationsEnabled: false,
     });
+
+    BackgroundGeolocation.on('location', (location) => {
+      console.log(location);
+      const { latitude, longitude } = location;
+      BackgroundGeolocation.startTask((taskKey) => {
+        this.setState({ latitude, longitude });
+        BackgroundGeolocation.endTask(taskKey);
+      });
+    });
+
+    BackgroundGeolocation.on('background', () => {
+      console.log('[INFO] App is in background');
+    });
+
+    BackgroundGeolocation.on('foreground', () => {
+      console.log('[INFO] App is in foreground');
+    });
+
+    BackgroundGeolocation.checkStatus((status) => {
+      console.log('[INFO] BackgroundGeolocation service is running', status.isRunning);
+      console.log('[INFO] BackgroundGeolocation services enabled', status.locationServicesEnabled);
+      console.log('[INFO] BackgroundGeolocation auth status: ', status.authorization);
+    });
+
+    // you can also just start without checking for status
+    BackgroundGeolocation.start();
+
+    /* BackgroundGeolocation.getConfig(config => console.log(config)); */
+  }
+
+  componentWillUnmount() {
+    BackgroundGeolocation.removeAllListeners();
   }
 
   render() {
+    const { latitude, longitude } = this.state;
     return (
-      <View>
-        <Text>Hi</Text>
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <Text>{`Latitud: ${latitude}`}</Text>
+        <Text>{`Longitud: ${longitude}`}</Text>
       </View>
     );
   }
