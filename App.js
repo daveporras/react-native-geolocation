@@ -23,10 +23,6 @@ export default class App extends Component {
       notificationsEnabled: false,
     });
 
-    BackgroundGeolocation.headlessTask((event) => {
-      console.log(event);
-    });
-
     BackgroundGeolocation.on('location', (location) => {
       console.log(location);
       const { latitude, longitude } = location;

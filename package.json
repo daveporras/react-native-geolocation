@@ -6,7 +6,8 @@
     "start": "node node_modules/react-native/local-cli/cli.js start",
     "test": "jest",
     "android": "react-native run-android",
-    "ios": "react-native run-ios"
+    "ios": "react-native run-ios",
+    "release:android": "react-native run-android --variant=release"
   },
   "dependencies": {
     "@mauron85/react-native-background-geolocation": "^0.5.3",
